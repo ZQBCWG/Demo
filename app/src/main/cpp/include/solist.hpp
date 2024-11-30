@@ -106,7 +106,7 @@ inline T *getStaticPointer(const SandHook::ElfImg &linker, const char *name) {
   return addr == NULL ? NULL : *addr;
 }
 
-static SoInfo *DetectZygisk(const char *mark) {
+static SoInfo *DetectInjection() {
   if (solist == NULL && !Initialize()) {
     LOGE("Failed to initialize solist");
     return NULL;
@@ -119,8 +119,8 @@ static SoInfo *DetectZygisk(const char *mark) {
 
   for (auto iter = solist; iter; iter = iter->get_next()) {
 
-    // No soinfo has its both name and path empty
-    if (iter->get_name()[0] == '\0' && iter->get_path()[0] == '\0') {
+    // No soinfo has empty path name
+    if (iter->get_path()[0] == '\0') {
       return iter;
     }
 
@@ -136,7 +136,10 @@ static SoInfo *DetectZygisk(const char *mark) {
     } else if (iter - prev == 2 * gap) {
       // A gap appears, indicating that one library was unloaded
       auto dropped = (SoInfo *)((uintptr_t)prev + gap);
-      if (strstr(prev->get_name(), mark) || strstr(iter->get_name(), mark))
+      const char *mark =
+          "libnativehelper.so"; // The first library to load after AppSpecialize
+      if (strcmp(prev->get_name(), mark) == 0 ||
+          strcmp(iter->get_name(), mark) == 0)
         return dropped;
     } else {
       gap_repeated--;
