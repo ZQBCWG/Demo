@@ -15,20 +15,15 @@ SoInfo *DetectInjection() {
   size_t gap = 0;
   auto gap_repeated = 0;
 
-  SoInfo *stats_jni = NULL;
-
   for (auto iter = solist; iter; iter = iter->get_next()) {
     // No soinfo has empty path name
     if (iter->get_path()[0] == '\0') {
       return iter;
     }
 
-    if (stats_jni == NULL && strcmp(iter->get_name(), "libstats_jni.so") == 0) {
-      stats_jni = iter;
-    }
-
-    if (iter - prev != gap && gap_repeated == 0) {
+    if (iter - prev != gap && gap_repeated < 1) {
       gap = iter - prev;
+      gap_repeated = 0;
     } else if (iter - prev == gap) {
       LOGD("Skip solinfo %p: %s", iter, iter->get_name());
       gap_repeated++;
@@ -42,18 +37,14 @@ SoInfo *DetectInjection() {
         return dropped;
     } else {
       gap_repeated--;
-      LOGD("Strange gap 0x%lx or 0x%lx != 0x%lx between %s and %s", iter - prev,
-           prev - iter, gap, prev->get_name(), iter->get_name());
+      if (gap != 0)
+        LOGD("Suspicious gap 0x%lx or 0x%lx != 0x%lx between %s and %s",
+             iter - prev, prev - iter, gap, prev->get_name(), iter->get_name());
     }
     prev = iter;
   }
 
-  if (stats_jni == NULL || stats_jni->get_next() != *sonext) {
-    // libstats_jni should be loaded exactly before current library libdemo.so
-    return stats_jni;
-  } else {
-    return nullptr;
-  }
+  return nullptr;
 }
 
 bool Initialize() {
