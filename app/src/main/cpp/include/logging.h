@@ -2,7 +2,6 @@
 
 #include <android/log.h>
 #include <errno.h>
-#include <string.h>
 
 #ifndef LOG_TAG
 #define LOG_TAG "Demo"
@@ -23,10 +22,10 @@
   LOGE(fmt " failed with %d: %s", ##args, errno, strerror(errno))
 
 namespace logging {
-void setfd(int fd);
-
-int getfd();
-
-[[gnu::format(printf, 3, 4)]]
-void log(int prio, const char *tag, const char *fmt, ...);
+inline void log(int prio, const char *tag, const char *fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  __android_log_vprint(prio, tag, fmt, ap);
+  va_end(ap);
+}
 } // namespace logging
