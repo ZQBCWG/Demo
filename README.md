@@ -1,4 +1,4 @@
-# Detecting library injection in memory using `solist`
+# Detecting library injection in memory using `solist` and `virtual maps`
 
 ## Detection using `solist`
 
@@ -12,3 +12,7 @@ The following cases are considered as injections:
 1. some `soinfo` object has empty pathname;
 2. the linked list of all `soinfo` has gaps between elements, and such gap appears before `libart.so` is loaded;
 3. the library `libstats_jni.so` is not loaded exactly before the application's native library.
+
+## Detection using `virtual maps`
+
+See blog [Android 用户态注入隐藏已死](https://nullptr.icu/index.php/archives/182/).
