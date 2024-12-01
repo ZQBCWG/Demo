@@ -14,33 +14,70 @@ SoInfo *DetectInjection() {
   SoInfo *prev = solist;
   size_t gap = 0;
   auto gap_repeated = 0;
+  bool app_process_loaded = false;
+  bool app_specialized = false;
+  const char *libraries_after_specialization[2] = {"libart.so",
+                                                   "libdexfile.so"};
+  bool nativehelper_loaded =
+      false; // Not necessarily loaded after AppSpecialize
 
   for (auto iter = solist; iter; iter = iter->get_next()) {
     // No soinfo has empty path name
-    if (iter->get_path()[0] == '\0') {
+    if (iter->get_path() == NULL || iter->get_path()[0] == '\0') {
       return iter;
+    }
+
+    if (iter->get_name() == NULL && app_process_loaded) {
+      return iter;
+    }
+
+    if (iter->get_name() == NULL &&
+        strstr(iter->get_path(), "/system/bin/app_proces")) {
+      app_process_loaded = true;
+      // /system/bin/app_process64 maybe set null name
+      LOGD("Skip %s, gap size", iter, iter->get_path());
+      continue;
     }
 
     if (iter - prev != gap && gap_repeated < 1) {
       gap = iter - prev;
       gap_repeated = 0;
     } else if (iter - prev == gap) {
-      LOGD("Skip solinfo %p: %s", iter, iter->get_name());
+      LOGD("Skip soinfo %p: %s", iter, iter->get_name());
       gap_repeated++;
     } else if (iter - prev == 2 * gap) {
       // A gap appears, indicating that one library was unloaded
       auto dropped = (SoInfo *)((uintptr_t)prev + gap);
-      const char *mark =
-          "libnativehelper.so"; // The first library to load after AppSpecialize
-      if (strcmp(prev->get_name(), mark) == 0 ||
-          strcmp(iter->get_name(), mark) == 0)
+
+      if (!nativehelper_loaded || !app_specialized) {
+        // gap cannot appear before libnativehelper is loaded
         return dropped;
+      } else {
+        // gap may appear after any of these libraries is loaded
+        LOGW("%p is dropped between %s and %s", dropped, prev->get_path(),
+             iter->get_path());
+      }
     } else {
       gap_repeated--;
       if (gap != 0)
         LOGD("Suspicious gap 0x%lx or 0x%lx != 0x%lx between %s and %s",
              iter - prev, prev - iter, gap, prev->get_name(), iter->get_name());
     }
+
+    auto name = iter->get_name();
+    if (!app_specialized) {
+      for (int i = 0; i < 2; i++) {
+        if (strcmp(name, libraries_after_specialization[i]) == 0) {
+          app_specialized = true;
+          break;
+        }
+      }
+    }
+
+    if (!nativehelper_loaded && strcmp(name, "libnativehelper.so") == 0) {
+      nativehelper_loaded = true;
+    }
+
     prev = iter;
   }
 

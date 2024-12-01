@@ -10,7 +10,7 @@ Hence, an injected application can easily find all loaded libraries.
 
 The following cases are considered as injections:
 1. some `soinfo` object has empty pathname;
-2. the linked list of all `soinfo` has gaps between elements, and such gap appears before `libart.so` is loaded;
+2. the linked list of all `soinfo` has gaps between elements, and such gap appears before [specializeAppProcess](https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/core/java/com/android/internal/os/Zygote.java;l=436).
 
 ## Detection using `virtual maps`
 
