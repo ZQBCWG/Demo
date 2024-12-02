@@ -1,4 +1,4 @@
-# Detecting library injection in memory using `solist` and `virtual maps`
+# Detecting library injection in memory
 
 ## Detection using `solist`
 
