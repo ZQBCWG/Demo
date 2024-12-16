@@ -7,7 +7,7 @@ namespace SoList {
 class SoInfo {
 public:
 #ifdef __LP64__
-  inline static size_t solist_next_offset = 0x30;
+  inline static size_t solist_next_offset = 0x28;
   constexpr static size_t solist_realpath_offset = 0x1a8;
 #else
   inline static size_t solist_next_offset = 0xa4;
@@ -89,6 +89,7 @@ private:
 static SoInfo *solist = NULL;
 static SoInfo *somain = NULL;
 static SoInfo **sonext = NULL;
+static uint64_t *g_module_unload_counter = NULL;
 
 static bool Initialize();
 
@@ -100,6 +101,7 @@ inline T *getStaticPointer(const SandHook::ElfImg &linker, const char *name) {
 }
 
 SoInfo *DetectInjection();
+size_t DetectModules();
 
 bool Initialize();
 

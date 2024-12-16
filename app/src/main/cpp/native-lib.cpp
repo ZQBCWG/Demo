@@ -12,11 +12,10 @@ Java_org_matrix_demo_MainActivity_stringFromJNI(JNIEnv *env,
 
   std::string solist_detection = "No injection found using solist";
   std::string vmap_detection = "No injection found using vitrual map";
-  std::string smap_detection = "No injection found using stats map";
+  std::string counter_detection = "No injection found using module counter";
   SoList::SoInfo *abnormal_soinfo = SoList::DetectInjection();
   VirtualMap::MapInfo *abnormal_vmap = VirtualMap::DetectInjection();
-  /* StatsMap::SmapsEntry abnormal_smap = */
-  /*     StatsMap::DetectInjection(std::string("libharfbuzz_ng.so")); */
+  size_t module_injected = SoList::DetectModules();
 
   if (abnormal_soinfo != nullptr) {
     solist_detection =
@@ -32,13 +31,12 @@ Java_org_matrix_demo_MainActivity_stringFromJNI(JNIEnv *env,
          abnormal_vmap->start, abnormal_vmap->end);
   }
 
-  /* if (abnormal_smap.private_dirty_kb != -1) { */
-  /*   smap_detection = */
-  /*       std::format("Stats map: injection at {}", abnormal_smap.pathname); */
-  /*   LOGE("Abnormal smap %s", abnormal_smap.pathname.data()); */
-  /* } */
+  if (module_injected > 0) {
+    counter_detection =
+        std::format("Module counter: {} shared libraries injected", module_injected);
+  }
 
   return env->NewStringUTF(
-      (solist_detection + "\n" + vmap_detection + "\n" + smap_detection)
+      (solist_detection + "\n" + vmap_detection + "\n" + counter_detection)
           .c_str());
 }

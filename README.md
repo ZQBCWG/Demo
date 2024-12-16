@@ -16,8 +16,12 @@ The following cases are considered as injections:
 
 See blog [Android 用户态注入隐藏已死](https://nullptr.icu/index.php/archives/182/).
 
+## Detection using `module counter`
+
+A call to `dlclose` will increase the counter [g_module_unload_counter](https://cs.android.com/android/platform/superproject/main/+/main:bionic/linker/linker.cpp;l=1956).
+
 ## State of bypassing current test
 
-- [x] [Zygisk of Magisk](https://github.com/topjohnwu/Magisk)
-- [x] [ZygiskNext](https://github.com/Dr-TSNG/ZygiskNext) (since [v1.1.0](https://github.com/Dr-TSNG/ZygiskNext/releases/tag/v1.1.0))
+- [ ] [Zygisk of Magisk](https://github.com/topjohnwu/Magisk)
+- [ ] [ZygiskNext](https://github.com/Dr-TSNG/ZygiskNext)
 - [x] [ReZygisk](https://github.com/PerformanC/ReZygisk) (fixed by JingMatrix in https://github.com/PerformanC/ReZygisk/pull/101)

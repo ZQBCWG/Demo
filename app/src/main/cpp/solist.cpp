@@ -6,6 +6,15 @@ namespace SoList {
 ProtectedDataGuard::FuncType ProtectedDataGuard::ctor = NULL;
 ProtectedDataGuard::FuncType ProtectedDataGuard::dtor = NULL;
 
+size_t DetectModules() {
+  if (g_module_unload_counter == NULL) {
+    LOGI("g_module_unload_counter not found");
+    return 0;
+  } else {
+    return *g_module_unload_counter;
+  }
+}
+
 SoInfo *DetectInjection() {
   if (solist == NULL && !Initialize()) {
     LOGE("Failed to initialize solist");
@@ -117,8 +126,8 @@ bool Initialize() {
   snprintf(sonext_sym_name, sizeof(somain_sym_name), "__dl__ZL6sonext%s",
            llvm_sufix);
 
-  char vsdo_sym_name[sizeof("__dl__ZL4vdso") + sizeof(llvm_sufix)];
-  snprintf(vsdo_sym_name, sizeof(vsdo_sym_name), "__dl__ZL4vdso%s", llvm_sufix);
+  char vdso_sym_name[sizeof("__dl__ZL4vdso") + sizeof(llvm_sufix)];
+  snprintf(vdso_sym_name, sizeof(vdso_sym_name), "__dl__ZL4vdso%s", llvm_sufix);
 
   somain = getStaticPointer<SoInfo>(linker, somain_sym_name);
   if (somain == NULL)
@@ -128,9 +137,7 @@ bool Initialize() {
   if (sonext == NULL)
     return false;
 
-  SoInfo *vsdo = getStaticPointer<SoInfo>(linker, vsdo_sym_name);
-  if (vsdo == NULL)
-    return false;
+  SoInfo *vdso = getStaticPointer<SoInfo>(linker, vdso_sym_name);
 
   SoInfo::get_realpath_sym =
       reinterpret_cast<decltype(SoInfo::get_realpath_sym)>(
@@ -138,11 +145,15 @@ bool Initialize() {
   SoInfo::get_soname_sym = reinterpret_cast<decltype(SoInfo::get_soname_sym)>(
       linker.getSymbAddress("__dl__ZNK6soinfo10get_sonameEv"));
 
+  g_module_unload_counter = reinterpret_cast<decltype(g_module_unload_counter)>(
+      linker.getSymbAddress("__dl__ZL23g_module_unload_counter"));
+  if (g_module_unload_counter != NULL)
+    LOGD("found symbol g_module_unload_counter");
+
   for (size_t i = 0; i < 1024 / sizeof(void *); i++) {
     auto *possible_next = *(void **)((uintptr_t)solist + i * sizeof(void *));
-    if (possible_next == somain || (vsdo != NULL && possible_next == vsdo)) {
+    if (possible_next == somain || (vdso != NULL && possible_next == vdso)) {
       SoInfo::solist_next_offset = i * sizeof(void *);
-
       break;
     }
   }
