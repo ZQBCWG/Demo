@@ -20,4 +20,4 @@ See blog [Android 用户态注入隐藏已死](https://nullptr.icu/index.php/arc
 
 - [x] [Zygisk of Magisk](https://github.com/topjohnwu/Magisk)
 - [x] [ZygiskNext](https://github.com/Dr-TSNG/ZygiskNext) (since [v1.1.0](https://github.com/Dr-TSNG/ZygiskNext/releases/tag/v1.1.0))
-- [ ] [ReZygisk](https://github.com/PerformanC/ReZygisk)
+- [x] [ReZygisk](https://github.com/PerformanC/ReZygisk) (fixed by JingMatrix in https://github.com/PerformanC/ReZygisk/pull/101)
