@@ -33,7 +33,7 @@ Java_org_matrix_demo_MainActivity_stringFromJNI(JNIEnv *env,
 
   if (module_injected > 0) {
     counter_detection =
-        std::format("Module counter: {} shared libraries injected", module_injected);
+        std::format("Module counter: {} shared libraries unloaded", module_injected);
   }
 
   return env->NewStringUTF(

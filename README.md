@@ -20,6 +20,8 @@ See blog [Android 用户态注入隐藏已死](https://nullptr.icu/index.php/arc
 
 A call to `dlclose` will increase the counter [g_module_unload_counter](https://cs.android.com/android/platform/superproject/main/+/main:bionic/linker/linker.cpp;l=1956).
 
+This detection highly depends on Android OS and vendor customization, which is shown to be false positive on Samsung and OnePlus.
+
 ## State of bypassing current test
 
 - [ ] [Zygisk of Magisk](https://github.com/topjohnwu/Magisk)
