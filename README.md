@@ -16,14 +16,22 @@ The following cases are considered as injections:
 
 See blog [Android 用户态注入隐藏已死](https://nullptr.icu/index.php/archives/182/).
 
+## Detection using `mountinfo`
+
+Current root solutions of Android are implemented in a systmeless way, meaning that they overlay the filesystems of the device by [mounting](https://man7.org/linux/man-pages/man8/mount.8.html) instead of overwriting the actual file contents.
+
+The following cases are considered as injections:
+1. common mount points of known root implementations present in [proc_pid_mountinfo](https://man7.org/linux/man-pages/man5/proc_pid_mountinfo.5.html);
+2. gaps between mount IDs or mounting peer IDs appearing before mounting points specific to current application.
+
+
 ## Detection using `module counter`
 
 A call to `dlclose` will increase the counter [g_module_unload_counter](https://cs.android.com/android/platform/superproject/main/+/main:bionic/linker/linker.cpp;l=1956).
 
 This detection highly depends on Android OS and vendor customization, which is shown to be false positive on Samsung and OnePlus.
 
-## State of bypassing current test
+# How to bypass all of them
 
-- [ ] [Zygisk of Magisk](https://github.com/topjohnwu/Magisk)
-- [ ] [ZygiskNext](https://github.com/Dr-TSNG/ZygiskNext)
-- [x] [ReZygisk](https://github.com/PerformanC/ReZygisk) (fixed by JingMatrix in https://github.com/PerformanC/ReZygisk/pull/101)
+Open source solution: [JingMatrix/NeoZygisk](https://github.com/JingMatrix/NeoZygisk) with [JingMatrix/APatch](https://github.com/JingMatrix/APatch).
+
