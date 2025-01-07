@@ -5,7 +5,7 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
-  workflow_dispatch:
+  workflows_dispatch:
 
 jobs:
   build:
@@ -22,27 +22,14 @@ jobs:
 
     - name: Build with Gradle
       run: ./gradlew app:assembleRelease
-        
-    - name: Rename signed apk
-      run: mv app/build/outputs/apk/release/app-release-unsigned.apk app/build/outputs/apk/release/Demo.apk
 
-    - uses: noriban/sign-android-release@master
-      name: Sign app APK
-      id: sign_app
-      with:
-        releaseDirectory: app/build/outputs/apk/release
-        signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-        alias: ${{ secrets.ALIAS }}
-        keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-        keyPassword: ${{ secrets.KEY_PASSWORD }}
-
-    - name: Upload signed APK
+    - name: Upload unsigned APK
       uses: actions/upload-artifact@main
       with:
         name: Demo.apk
-        path: ${{steps.sign_app.outputs.signedReleaseFile}}
+        path: app/build/outputs/apk/release/app-release-unsigned.apk
 
-    - name: Collect signed APK
+    - name: Collect unsigned APK
       uses: actions/download-artifact@main
       with:
         name: Demo.apk
